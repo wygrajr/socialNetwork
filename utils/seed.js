@@ -1,56 +1,88 @@
 const connection = require('../config/connection');
-const { Course, Student } = require('../models');
-const { getRandomName, getRandomAssignments } = require('./data');
+const { User, Thought } = require('../models');
 
 connection.on('error', (err) => err);
 
 connection.once('open', async () => {
   console.log('connected');
-    // Delete the collections if they exist
-    let courseCheck = await connection.db.listCollections({ name: 'courses' }).toArray();
-    if (courseCheck.length) {
-      await connection.dropCollection('courses');
-    }
-
-    let studentsCheck = await connection.db.listCollections({ name: 'students' }).toArray();
-    if (studentsCheck.length) {
-      await connection.dropCollection('students');
-    }
-
-
-  // Create empty array to hold the students
-  const students = [];
-
-  // Loop 20 times -- add students to the students array
-  for (let i = 0; i < 20; i++) {
-    // Get some random assignment objects using a helper function that we imported from ./data
-    const assignments = getRandomAssignments(20);
-
-    const fullName = getRandomName();
-    const first = fullName.split(' ')[0];
-    const last = fullName.split(' ')[1];
-    const github = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
-
-    students.push({
-      first,
-      last,
-      github,
-      assignments,
-    });
+  
+  let usersCheck = await connection.db.listCollections({ name: 'users' }).toArray();
+  if (usersCheck.length) {
+    await connection.dropCollection('users');
   }
 
-  // Add students to the collection and await the results
-  await Student.collection.insertMany(students);
+  let thoughtsCheck = await connection.db.listCollections({ name: 'thoughts' }).toArray();
+  if (thoughtsCheck.length) {
+    await connection.dropCollection('thoughts');
+  }
 
-  // Add courses to the collection and await the results
-  await Course.collection.insertOne({
-    courseName: 'UCLA',
-    inPerson: false,
-    students: [...students],
-  });
+  const thoughts = await Thought.collection.insertMany(thoughtData)
 
-  // Log out the seed data to indicate what should appear in the database
-  console.table(students);
+  const userData = [
+    {
+      "username": "Funky_Buddha",
+      "email": "goodvibes@fb.org",
+      "thoughts": [thoughts.insertedIds['0']._id],
+      "friends": []
+    },
+    {
+      "username": "RushOffCoding",
+      "email": "starcoder@rfc.com",
+      "thoughts": [thoughts.insertedIds['2']._id],
+      "friends": []
+    }
+  ]
+
+  const users = await User.collection.insertMany(userData)
+  console.log(users)
+
+  const userWithFriend = {
+    "username": "happyTreeFriend",
+    "email": "safetheplanet@cc.net",
+    "friends": [users.insertedIds['0']._id],
+    "thoughts": [thoughts.insertedIds['1']._id]
+  }
+
+  await User.collection.insertOne(userWithFriend)
+
+  console.table(userData);
+  console.table(thoughtData);
+
   console.info('Seeding complete! 🌱');
   process.exit(0);
 });
+
+const thoughtData = [
+  {
+   "thoughtText": "Frankely, there are not enough trees around Miami. More trees would make the area nicer and smell wonderful! :)",
+   "username": "happyTreeFriend",
+   "reactions": [
+    {
+      "reactionBody": ":((",
+      "username": "RushOffCoding", 
+     },
+   ], 
+  },
+  {
+    "thoughtText": "Folks we need argue less and work together. No need to put out negative energies everyday. Let's all be chill.",
+    "username": "Funky_Buddha", 
+    "reactions": [
+      {
+        "reactionBody": ":))",
+        "username": "happyTreeFriend", 
+       },
+     ],
+   },
+   {
+    "thoughtText": "I NEED TO CODE! Please give me suggestions on what you would like to see me build next!",
+    "username": "RushOffCoding", 
+    "reactions": [
+      {
+        "reactionBody": ":()",
+        "username": "Funky_Buddha", 
+       }
+     ],
+   }
+]
+
+
