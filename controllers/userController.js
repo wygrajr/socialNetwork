@@ -30,8 +30,7 @@ const userController = {
       .then((userId) => {
         if (!userId) {
           return res
-            .status(404)
-            .json();
+            .status(404);
         }
         res.json(userId);
       })
@@ -40,6 +39,14 @@ const userController = {
         res.sendStatus(400);
       });
   },
+  
+  createUser({ body }, res) {
+    User.create(body)
+      .then((createUser) => res.json(createUser))
+      .catch((err) => res.json(err));
+  },
 };
+
+
 
 module.exports = userController;
