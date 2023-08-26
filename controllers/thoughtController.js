@@ -90,6 +90,31 @@ const thoughtController = {
       .catch((err) => res.json(err));
   },
 
+  addReaction({ params, body }, res) {
+    Thought.findOneAndUpdate(
+      { _id: params.thoughtId },
+      { $addToSet: { reactions: body } },
+      { new: true, runValidators: true }
+    )
+      .then((addReaction) => {
+        if (!addReaction) {
+          res.status(404);
+          return;
+        }
+        res.json(addReaction);
+      })
+      .catch((err) => res.json(err));
+  },
+
+  removeReaction({ params }, res) {
+    Thought.findOneAndUpdate(
+      { _id: params.thoughtId },
+      { $pull: { reactions: { reactionId: params.reactionId } } },
+      { new: true }
+    )
+      .then((removeReaction) => res.json(removeReaction))
+      .catch((err) => res.json(err));
+  },
 };
 
 module.exports = thoughtController;
