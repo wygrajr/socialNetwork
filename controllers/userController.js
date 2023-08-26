@@ -45,6 +45,31 @@ const userController = {
       .then((createUser) => res.json(createUser))
       .catch((err) => res.json(err));
   },
+
+  updateUser({ params, body }, res) {
+    User.findOneAndUpdate({ _id: params.id }, body, {
+      new: true,
+      runValidators: true,
+    })
+      .then((updateUser) => {
+        if (!updateUser) {
+          res.status(404).json();
+          return;
+        }
+        res.json(updateUser);
+      })
+      .catch((err) => res.json(err));
+  },
+
+  deleteUser({ params }, res) {
+    User.findOneAndDelete({ _id: params.id })
+      .then((deleteUser) => {
+        if (!deleteUser) {
+          return res.status(404).json();
+        }})
+      .catch((err) => res.json(err));
+  },
+
 };
 
 

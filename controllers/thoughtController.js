@@ -45,14 +45,51 @@ const thoughtController = {
           { new: true }
         );
       })
-      .then((dbUserData) => {
-        if (!dbUserData) {
+      .then((createThought) => {
+        if (!createThought) {
           return res
             .status(404);
         }
       })
       .catch((err) => res.json(err));
   },
+
+  updateThought({ params, body }, res) {
+    Thought.findOneAndUpdate({ _id: params.id }, body, {
+      new: true,
+      runValidators: true,
+    })
+      .then((updateThought) => {
+        if (!updateThought) {
+          res.status(404);
+          return;
+        }
+        res.json(updateThought);
+      })
+      .catch((err) => res.json(err));
+  },
+
+  deleteThought({ params }, res) {
+    Thought.findOneAndDelete({ _id: params.id })
+      .then((deleteThought) => {
+        if (!deleteThought) {
+          return res.status(404);
+        }
+
+        return User.findOneAndUpdate(
+          { thoughts: params.id },
+          { $pull: { thoughts: params.id } },
+        );
+      })
+      .then((deleteThought) => {
+        if (!deleteThought) {
+          return res
+            .status(404);
+        };
+      })
+      .catch((err) => res.json(err));
+  },
+
 };
 
 module.exports = thoughtController;
