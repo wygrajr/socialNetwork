@@ -67,6 +67,7 @@ const userController = {
         if (!deleteUser) {
           return res.status(404).json();
         }})
+        res.sendStatus(200)
       .catch((err) => res.json(err));
   },
 
@@ -96,7 +97,7 @@ const userController = {
         if (!removeFriend) {
           return res.status(404);
         }
-        res.json(removeFriend);
+        res.sendStatus(200)
       })
       .catch((err) => res.json(err));
   },
